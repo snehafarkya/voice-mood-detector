@@ -1,16 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 //@ts-ignore
 import Sentiment from 'sentiment';
 
-// English sentiment analyzer
 const sentiment = new Sentiment();
 
-// Hindi + English shocking and mood keyword detector
 const detectHindiMood = (text: string): 'positive' | 'negative' | 'neutral' | 'shocking' => {
   const lower = text.toLowerCase();
 
-  const positiveWords = ['khush', 'acha', 'pyaar', 'accha', 'shandar', 'masti', 'maja'];
-  const negativeWords = ['dukhi', 'bura', 'gussa', 'naraz', 'udaas', 'dard', 'tanha'];
+  const positiveWords = ['khush', 'acha', 'pyaar', 'nice', 'shandar', 'masti', 'maja'];
+  const negativeWords = ['dukhi','upset', 'bura', 'gussa', 'naraz', 'udaas', 'dard', 'tanha'];
   const shockingWords = [
     'dhoka', 'chori', 'hatya', 'aatank', 'hamla', 'blast','surprise',
     'murder', 'kill', 'explosion', 'terrorist', 'gun', 'dead', 'death','what'
@@ -27,6 +25,7 @@ export default function VoiceMoodDetector() {
   const [transcript, setTranscript] = useState('');
   const [mood, setMood] = useState('');
   const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const bgColor =
     mood === 'positive' ? 'bg-green-900'
@@ -45,6 +44,7 @@ export default function VoiceMoodDetector() {
     }
 
     const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
     recognition.lang = 'en-IN'; // English + Hindi mix
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
@@ -61,7 +61,7 @@ export default function VoiceMoodDetector() {
 
       if (result.score > 1) moodResult = 'positive';
       else if (result.score < -1) moodResult = 'negative';
-      else moodResult = detectHindiMood(speechText); // Fallback to Hindi/English keywords
+      else moodResult = detectHindiMood(speechText); 
 
       // Optional: trigger vibration for shocking mood
       if (moodResult === 'shocking' && navigator.vibrate) {
@@ -77,20 +77,42 @@ export default function VoiceMoodDetector() {
       setListening(false);
     };
 
+    recognition.onend = () => {
+      setListening(false);
+    };
+
     recognition.start();
+  };
+
+  const handleStop = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setListening(false);
   };
 
   return (
     <div className={`w-full h-screen flex flex-col items-center justify-center transition-all duration-500 ${bgColor}`}>
       <h1 className="text-5xl font-bold mb-4 text-white">🎙️ Voice Mood Detector</h1>
 
-      <button
-        onClick={handleStart}
-        disabled={listening}
-        className=" rounded-lg border py-4 px-7  bg-[#1a1a1a] cursor-pointer  text-white font-medium transition hover:border-[#646cff] duration-300"
-      >
-        {listening ? 'Listening...' : 'Start Speaking'}
-      </button>
+      <div className="flex gap-4">
+        <button
+          onClick={handleStart}
+          disabled={listening}
+          className="rounded-lg border py-4 px-7 bg-[#1a1a1a] text-white font-medium transition hover:border-[#646cff] duration-300"
+        >
+          {listening ? 'Listening...' : 'Start Speaking'}
+        </button>
+
+        {listening && (
+          <button
+            onClick={handleStop}
+            className="rounded-lg border py-4 px-7 bg-white text-[#1a1a1a] font-medium transition hover:border-grey-400 duration-300"
+          >
+            ⏹️ Stop
+          </button>
+        )}
+      </div>
 
       {transcript && (
         <div className="mt-6 text-center">
