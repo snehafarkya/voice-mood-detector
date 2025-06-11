@@ -93,9 +93,9 @@ export default function VoiceMoodDetector() {
 
   return (
     <div className={`w-full h-screen flex flex-col items-center justify-center transition-all duration-500 ${bgColor}`}>
-      <h1 className="text-5xl font-bold mb-4 text-white">🎙️ Voice Mood Detector</h1>
+      <h1 className="md:text-5xl text-3xl text-center font-bold mb-4 text-white">🎙️ Voice Mood Detector</h1>
 
-      <div className="flex gap-4">
+      <div className="flex md:flex-row flex-col gap-4">
         <button
           onClick={handleStart}
           disabled={listening}
