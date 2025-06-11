@@ -32,7 +32,7 @@ export default function VoiceMoodDetector() {
     mood === 'positive' ? 'bg-green-900'
     : mood === 'negative' ? 'bg-[#004040]'
     : mood === 'neutral' ? 'bg-purple-900'
-    : mood === 'shocking' ? 'bg-orange-900'
+    : mood === 'shocking' ? 'bg-blue-900'
     : 'bg-[#242424]';
 
   const handleStart = () => {
